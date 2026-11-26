@@ -1,0 +1,572 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Number — A Number Guessing Game</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0d18;
+  --panel: #131829;
+  --panel2: #1a2035;
+  --text: #f5f7ff;
+  --muted: #919bb7;
+  --accent: #9b8cff;
+  --green: #60e6b2;
+  --red: #ff7893;
+  --border: #2b3450;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 10% 5%, #28204c 0, transparent 38%),
+    radial-gradient(ellipse at 90% 95%, #102c38 0, transparent 35%),
+    var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 28px 16px;
+}
+
+button, input, select { font: inherit; }
+
+.app { width: 100%; max-width: 720px; }
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.brand {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  font: 700 21px 'Space Grotesk', sans-serif;
+  letter-spacing: -0.8px;
+}
+
+.logo {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #b6a5ff, #7962ef);
+  color: #111327;
+  font-size: 24px;
+  box-shadow: 0 5px 25px #8c77ff35;
+}
+
+.pill {
+  border: 1px solid var(--border);
+  color: var(--green);
+  padding: 8px 12px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+h1 {
+  font: 700 clamp(34px, 7vw, 54px) 'Space Grotesk', sans-serif;
+  text-align: center;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin: 20px 0 12px;
+}
+
+h1 span {
+  background: linear-gradient(90deg, #c1b4ff, #7de7d3);
+  color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--muted);
+  text-align: center;
+  margin: 0 0 29px;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.card {
+  background: linear-gradient(145deg, #161c30f5, #101525f5);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: clamp(18px, 5vw, 30px);
+  box-shadow: 0 24px 80px #0003;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  color: var(--muted);
+  margin-bottom: 13px;
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.mode {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 14px 6px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.mode:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+.mode.active {
+  background: #9b8cff18;
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px #9b8cff20;
+}
+
+.mode .emoji { display: block; font-size: 22px; margin-bottom: 7px; }
+.mode strong { display: block; font-size: 12px; }
+.mode small { display: block; font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+.settings { margin-bottom: 20px; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+label {
+  display: block;
+  font-size: 12px;
+  color: #bbc4dd;
+  margin-bottom: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  background: #0c1120;
+  color: white;
+  border-radius: 11px;
+  outline: none;
+  min-width: 0;
+}
+
+input:focus { border-color: var(--accent); }
+input:disabled { opacity: .45; }
+
+.range-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+.btn {
+  border: none;
+  cursor: pointer;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: transform .2s, filter .2s;
+}
+
+.btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn:active { transform: scale(.98); }
+
+.primary {
+  color: #111327;
+  background: linear-gradient(100deg, #c0b4ff, #8e7bff);
+  box-shadow: 0 7px 24px #9b8cff25;
+}
+
+.secondary {
+  color: var(--text);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+
+.start-btn { width: 100%; }
+
+.play-area { display: none; }
+.play-area.visible { display: block; animation: rise .4s ease; }
+.setup.hidden { display: none; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.game-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.stat {
+  background: #0c1120;
+  border: 1px solid var(--border);
+  padding: 12px 15px;
+  border-radius: 13px;
+  flex: 1;
+  min-width: 0;
+}
+
+.stat small { color: var(--muted); font-size: 10px; display: block; }
+.stat strong { font: 600 20px 'Space Grotesk', sans-serif; display: block; margin-top: 4px; }
+
+.range-display {
+  text-align: center;
+  padding: 22px 10px;
+  background: radial-gradient(ellipse, #9b8cff12, transparent 75%);
+}
+
+.range-display small { color: var(--muted); letter-spacing: 1px; font-size: 11px; }
+.range-display h2 {
+  font: 600 clamp(32px, 8vw, 44px) 'Space Grotesk', sans-serif;
+  margin: 10px 0;
+  letter-spacing: -1.5px;
+}
+
+.range-display h2 span { color: var(--accent); }
+.range-display p { color: var(--muted); font-size: 12px; }
+
+.guess-form { display: flex; gap: 10px; margin: 12px 0 15px; }
+.guess-form input { font-size: 18px; font-weight: 600; }
+.guess-form button { min-width: 112px; }
+
+.message {
+  min-height: 55px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #0c1120;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #d6dbee;
+}
+
+.message.higher { color: #ffcb8b; border-color: #ffcb8b45; }
+.message.lower { color: #8ed9ff; border-color: #8ed9ff45; }
+.message.win { color: var(--green); border-color: #60e6b255; }
+
+.history-wrap { margin-top: 22px; }
+.history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 35px;
+  margin-top: 10px;
+}
+
+.guess-chip {
+  padding: 7px 11px;
+  border-radius: 9px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  color: #c6cce0;
+  font-size: 12px;
+}
+
+.guess-chip.higher { color: #ffcb8b; }
+.guess-chip.lower { color: #8ed9ff; }
+.guess-chip.correct { color: var(--green); border-color: #60e6b255; }
+
+.actions { display: flex; gap: 10px; margin-top: 23px; }
+.actions button { flex: 1; }
+
+.footer {
+  color: #68728d;
+  text-align: center;
+  font-size: 11px;
+  margin-top: 23px;
+}
+
+.toast {
+  text-align: center;
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 12px;
+  min-height: 17px;
+}
+
+@media (max-width: 430px) {
+  .modes { gap: 6px; }
+  .mode strong { font-size: 11px; }
+  .mode small { font-size: 9px; }
+  .guess-form { flex-wrap: wrap; }
+  .guess-form input { flex: 1; }
+  .guess-form button { min-width: 100%; }
+  .stat { padding: 10px; }
+  .stat strong { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="logo">✳</div> Lucky Number</div>
+    <div class="pill">● BRAIN GAME</div>
+  </header>
+
+  <h1>Trust your <span>intuition.</span></h1>
+  <p class="subtitle">One secret number. Infinite possibilities.<br>How quickly can you crack the code?</p>
+
+  <main class="card">
+    <section class="setup" id="setup">
+      <div class="section-label">01 — CHOOSE YOUR RANGE MODE</div>
+      <div class="modes">
+        <button class="mode active" data-mode="classic">
+          <span class="emoji">🎯</span><strong>Classic</strong><small>1 to 100</small>
+        </button>
+        <button class="mode" data-mode="custom">
+          <span class="emoji">⚙️</span><strong>Custom</strong><small>Your numbers</small>
+        </button>
+        <button class="mode" data-mode="random">
+          <span class="emoji">🎲</span><strong>Surprise</strong><small>Pick a size</small>
+        </button>
+      </div>
+
+      <div class="settings" id="customSettings" hidden>
+        <div class="field-row">
+          <div><label for="minInput">Minimum number</label><input id="minInput" type="number" value="1"></div>
+          <div><label for="maxInput">Maximum number</label><input id="maxInput" type="number" value="500"></div>
+        </div>
+        <p class="range-note">Choose any two different whole numbers.</p>
+      </div>
+
+      <div class="settings" id="randomSettings" hidden>
+        <label for="sizeInput">How many possible numbers?</label>
+        <input id="sizeInput" type="number" value="500" min="2" max="1000000">
+        <p class="range-note">The computer will secretly generate a starting point and build a range of this size. Example: size 500 could give you 2841–3340.</p>
+      </div>
+
+      <div class="settings" id="classicSettings">
+        <p class="range-note">Guess the secret number from 1 to 100. Need a bigger challenge? Try Surprise mode.</p>
+      </div>
+
+      <button class="btn primary start-btn" id="startBtn">Start the challenge&nbsp; →</button>
+      <div class="toast" id="setupError" role="alert"></div>
+    </section>
+
+    <section class="play-area" id="playArea">
+      <div class="game-top">
+        <div class="stat"><small>ATTEMPTS</small><strong id="attempts">0</strong></div>
+        <div class="stat"><small>AVERAGE POSSIBLE</small><strong id="best">7</strong></div>
+        <div class="stat"><small>RANGE SIZE</small><strong id="rangeSize">100</strong></div>
+      </div>
+
+      <div class="range-display">
+        <small>THE SECRET NUMBER IS BETWEEN</small>
+        <h2><span id="rangeMin">1</span> — <span id="rangeMax">100</span></h2>
+        <p>Enter your guess below and follow the clues.</p>
+      </div>
+
+      <form class="guess-form" id="guessForm">
+        <input id="guessInput" type="number" placeholder="Your guess..." required autocomplete="off">
+        <button class="btn primary" type="submit" id="guessBtn">Guess it ↗</button>
+      </form>
+
+      <div class="message" id="message" role="status" aria-live="polite">✨ Your adventure starts now. Make your first guess!</div>
+
+      <div class="history-wrap">
+        <div class="section-label">YOUR GUESS HISTORY</div>
+        <div class="history" id="history"><span class="range-note">Your guesses will appear here.</span></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn secondary" id="restartBtn">↻ New game</button>
+        <button class="btn secondary" id="giveUpBtn">Reveal number</button>
+      </div>
+    </section>
+  </main>
+  <div class="footer">MADE FOR CURIOUS MINDS · THINK SMART, GUESS SMARTER</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let mode = "classic";
+let secret = 0;
+let min = 1;
+let max = 100;
+let attempts = 0;
+let finished = false;
+let history = [];
+
+document.querySelectorAll(".mode").forEach(button => {
+  button.addEventListener("click", () => {
+    mode = button.dataset.mode;
+    document.querySelectorAll(".mode").forEach(b =>
+      b.classList.toggle("active", b === button)
+    );
+
+    $("classicSettings").hidden = mode !== "classic";
+    $("customSettings").hidden = mode !== "custom";
+    $("randomSettings").hidden = mode !== "random";
+    $("setupError").textContent = "";
+  });
+});
+
+function randInt(a, b) {
+  return Math.floor(Math.random() * (b - a + 1)) + a;
+}
+
+function startGame() {
+  let low, high;
+
+  if (mode === "classic") {
+    low = 1;
+    high = 100;
+  } else if (mode === "custom") {
+    low = Number($("minInput").value);
+    high = Number($("maxInput").value);
+
+    if (!Number.isSafeInteger(low) || !Number.isSafeInteger(high) ||
+        low >= high || !Number.isSafeInteger(high - low)) {
+      $("setupError").textContent =
+        "Please enter valid whole numbers, with minimum below maximum.";
+      return;
+    }
+  } else {
+    const size = Number($("sizeInput").value);
+
+    if (!Number.isSafeInteger(size) || size < 2 || size > 1000000) {
+      $("setupError").textContent =
+        "Choose a range size between 2 and 1,000,000.";
+      return;
+    }
+
+    low = randInt(1, 1000000 - size + 1);
+    high = low + size - 1;
+  }
+
+  min = low;
+  max = high;
+  secret = randInt(min, max);
+  attempts = 0;
+  finished = false;
+  history = [];
+
+  $("rangeMin").textContent = min.toLocaleString();
+  $("rangeMax").textContent = max.toLocaleString();
+  $("rangeSize").textContent = (max - min + 1).toLocaleString();
+  $("attempts").textContent = "0";
+  $("best").textContent = Math.ceil(Math.log2(max - min + 1));
+  $("message").className = "message";
+  $("message").textContent = "✨ Your adventure starts now. Make your first guess!";
+  $("history").innerHTML = '<span class="range-note">Your guesses will appear here.</span>';
+  $("guessInput").min = min;
+  $("guessInput").max = max;
+  $("guessInput").value = "";
+  $("guessInput").disabled = false;
+  $("guessBtn").disabled = false;
+  $("guessBtn").textContent = "Guess it ↗";
+  $("giveUpBtn").disabled = false;
+  $("setup").classList.add("hidden");
+  $("playArea").classList.add("visible");
+  $("guessInput").focus();
+}
+
+$("startBtn").addEventListener("click", startGame);
+
+function finishGame(message, type) {
+  finished = true;
+  $("message").className = "message " + type;
+  $("message").textContent = message;
+  $("guessInput").disabled = true;
+  $("guessBtn").disabled = true;
+  $("giveUpBtn").disabled = true;
+}
+
+$("guessForm").addEventListener("submit", event => {
+  event.preventDefault();
+  if (finished) return;
+
+  const value = Number($("guessInput").value);
+
+  if (!Number.isSafeInteger(value) || value < min || value > max) {
+    $("message").className = "message";
+    $("message").textContent =
+      `Please enter a whole number between ${min.toLocaleString()} and ${max.toLocaleString()}.`;
+    return;
+  }
+
+  if (history.some(item => item.value === value)) {
+    $("message").className = "message";
+    $("message").textContent = "You've already tried that number. Think of a new one!";
+    $("guessInput").select();
+    return;
+  }
+
+  attempts++;
+  let result, hint;
+
+  if (value === secret) {
+    result = "correct";
+    hint = "✓ " + value.toLocaleString() + " — Correct!";
+  } else if (value < secret) {
+    result = "higher";
+    hint = "↑ " + value.toLocaleString() + " — Too low";
+  } else {
+    result = "lower";
+    hint = "↓ " + value.toLocaleString() + " — Too high";
+  }
+
+  history.push({ value, result });
+
+  $("attempts").textContent = attempts;
+  $("history").innerHTML = history.map(item =>
+    `<span class="guess-chip ${item.result}">${item.result === "correct" ? "✓" : item.result === "higher" ? "↑" : "↓"} ${item.value.toLocaleString()}</span>`
+  ).join("");
+
+  if (result === "correct") {
+    const optimal = Math.ceil(Math.log2(max - min + 1));
+    const rating = attempts <= optimal ? "Genius guessing! 🏆" :
+                   attempts <= optimal + 3 ? "Nicely done! 🌟" :
+                   "You cracked the code! 🎉";
+    finishGame(`🎉 ${rating} The secret was ${secret.toLocaleString()}. Solved in ${attempts} attempt${attempts === 1 ? "" : "s"}!`, "win");
+  } else if (result === "higher") {
+    $("message").className = "message higher";
+    $("message").textContent = `⬆️ Too low! The secret number is HIGHER than ${value.toLocaleString()}. Try again.`;
+  } else {
+    $("message").className = "message lower";
+    $("message").textContent = `⬇️ Too high! The secret number is LOWER than ${value.toLocaleString()}. Try again.`;
+  }
+
+  $("guessInput").value = "";
+  if (!finished) $("guessInput").focus();
+});
+
+$("giveUpBtn").addEventListener("click", () => {
+  if (!finished) {
+    finishGame(`The secret number was ${secret.toLocaleString()}. Every game makes you sharper! 💜`, "");
+  }
+});
+
+$("restartBtn").addEventListener("click", () => {
+  $("playArea").classList.remove("visible");
+  $("setup").classList.remove("hidden");
+  $("setupError").textContent = "";
+});
+
+</script>
+</body>
+</html>
